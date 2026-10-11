@@ -4,7 +4,48 @@ A calm, responsive task and team workspace built for the Full Stack Intern asses
 
 ## Live deployment
 
-Deployment is in progress. Live URLs will be added after verification. Do not treat the local build as a live deployment.
+Deployed and verified on October 12, 2026.
+
+- **Frontend:** https://taskflow-mayur.vercel.app/
+- **Backend:** https://taskflow-api-46de.onrender.com/
+- **Health endpoint:** https://taskflow-api-46de.onrender.com/health
+- **Source:** https://github.com/Mayurpatel07/TaskFlow
+
+The backend root returns a JSON 404 because APIs use the documented paths. Use `/health` to check the service.
+
+### Services and account reference
+
+| Service | What it does | Current configuration | Management |
+| --- | --- | --- | --- |
+| GitHub | Public source repository | `Mayurpatel07/TaskFlow`, branch `main` | https://github.com/Mayurpatel07/TaskFlow |
+| Vercel | React frontend hosting | Hobby plan, project `taskflow-mayur` | https://vercel.com/mayur-patel1/taskflow-mayur |
+| Render | Node/Express API hosting | Free web service `taskflow-api`, Singapore | https://dashboard.render.com/web/srv-db5u2o942hec73a7c3ug/settings |
+| MongoDB Atlas | Persistent users and tasks | Free M0 cluster `TaskFlow`, AWS Singapore, database `taskflow` | https://cloud.mongodb.com/v2/6acb46ea8ec2c191136c3115#/overview |
+
+Render and Atlas use the college identity `mayur.patel23@pcu.edu.in`. Vercel uses Mayur's existing Hobby workspace. Provider passwords, the Atlas database password and JWT signing secret are private. They must never be placed in this repository.
+
+Atlas database user `taskflow_app` has `readWrite` on `taskflow` only. Its network access list allows Render's Singapore outbound ranges `74.220.52.0/24` and `74.220.60.0/24`, not all internet addresses. These ranges are shared by Render services in that region; they are not dedicated to this project. Recheck the Render Connect panel if the service region changes.
+
+### How the deployed parts connect
+
+The browser loads the built React app from Vercel. Axios sends JSON requests to Render using `VITE_API_URL=https://taskflow-api-46de.onrender.com`. Render validates JWTs and uses Mongoose to read/write Atlas. `CLIENT_URL=https://taskflow-mayur.vercel.app` restricts allowed browser origins. Database credentials exist only in the backend environment, never in the frontend bundle.
+
+### Current deployment and future updates
+
+The backend was deployed directly from the public GitHub repo, root `server`, with `npm ci --omit=dev` and `npm start`. The current deployment log reports Node.js 26.11.1 because `server/package.json` allows `>=22`; set `NODE_VERSION=22` in Render to pin the documented minimum runtime on a future deployment. Because the GitHub provider is not connected to Render, use **Manual Deploy** after pushing backend changes rather than assuming automatic deployment.
+
+The frontend was built from the same source and uploaded to Vercel as a ZIP of `client/dist` including `vercel.json`. GitHub is not connected to this Vercel project, so pushes do not update the frontend automatically. For a future update:
+
+```bash
+npm --prefix client ci
+# On Linux/macOS:
+VITE_API_URL=https://taskflow-api-46de.onrender.com npm --prefix client run build
+# Or put that value in client/.env before building on any OS.
+```
+
+Deploy the resulting `client/dist` to the existing Vercel project using Vercel CLI (`vercel --prod`) or connect the existing GitHub repository in Vercel project settings, with root `client`, Vite, build `npm run build`, output `dist`, and the same API environment variable. Avoid accidentally creating another production project. Include the SPA rewrites in `client/vercel.json`.
+
+Free Render instances sleep after inactivity. The first request can take 50 seconds or more to wake. Wait and retry if the first login times out. No paid service was purchased.
 
 ## Demo accounts
 
@@ -14,6 +55,21 @@ Deployment is in progress. Live URLs will be added after verification. Do not tr
 | Admin  | admin@example.com    | Admin@1234 |
 
 These are intentionally public assessment fixtures, not real account passwords. Do not enter sensitive data into this demo. Set `SEED_DEMO=true` to seed them on first server startup. Seeding is idempotent and does not reset existing passwords or delete data.
+
+## Live verification
+
+Verified on the deployed app/API, not only locally:
+
+- Member and admin demo login: success.
+- Registration: HTTP 201; a new account could log in.
+- Duplicate registration: HTTP 400.
+- Task create, details, update and delete: success through the API and the Vercel interface.
+- Deleted-task lookup: HTTP 404.
+- Protected task request without a JWT: HTTP 401.
+- Six seeded demo tasks remain, with two pending, two in progress and two completed.
+- Desktop login/dashboard and mobile login/admin dashboard visually checked.
+
+Temporary task checks were deleted. A synthetic `deployment-check-...@example.com` registration test user remains with no tasks. The application does not provide user deletion.
 
 ## Features
 
@@ -160,7 +216,7 @@ JWT lifetime: 8 hours normally, 7 days with Remember Me. Normal sessions use ses
 
 ## Screenshots
 
-Screenshots below are of the locally running app, verified in a real browser. Live deployment verification is still pending.
+The repository screenshots below show the locally running app. The live deployment has also been verified in a browser on desktop and mobile on October 12, 2026.
 
 ![Login](docs/screenshots/taskflow-login.png)
 ![Dashboard](docs/screenshots/taskflow-dashboard.png)
