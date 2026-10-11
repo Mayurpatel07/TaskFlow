@@ -1,0 +1,15 @@
+{
+  "name": "taskflow",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix server test",
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "install:all": "npm --prefix server ci && npm --prefix client ci",
+    "test:e2e": "node visual-test.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "playwright": "^1.61.1"
+  }
+}
